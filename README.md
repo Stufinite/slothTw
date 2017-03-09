@@ -1,82 +1,104 @@
-# 課搜（curso）
+# SlothTw（怠惰）  
+課程心得查詢的API
 
-*`curso`* 是西班牙文的課程，諧音為中文的 *`課搜`*（課程搜尋）  
-因此得名
+_`sloth`_ 是天主教中七原罪的怠惰之罪<br>
+學生基本上就是想要偷懶，才會想要看學長姊的修課心得XD<br>
+所以以此命名。無奈sloth在pypi上已經被註冊過了，所以後面加上Tw
 
-*`課搜`* 使用中興資工 [`普及資料與智慧運算實驗室`](http://web.nchu.edu.tw/~yfan/) 所開發的`KCM、KEM`等文字探勘模型作為輔助工具  
-當使用者所搜尋的名稱在資料庫查無符合資料時  
-系統會找出 `近似` 於使用者所查詢的 `關鍵字`   
-再次查詢資料庫  並且回傳`最符合的相關課程給使用者`
+![剛之煉金術師的怠惰](https://images2.alphacoders.com/231/231210.png)
 
-## API usage and Results
+## API
 
-api domain：*`http://www.campass.com.tw/`*  
-請在api domain後面接上正確的url pattern以及query string  
+api domain：目前還沒架起來，所以暫定`127.0.0.1`<br>
+請在api domain後面接上正確的url pattern以及query string<br>
 詳細的參數以及結果請參閱下面介紹
 
 ### parameter
 
-* `keyword`：the word you want to query.
-* `school`：Cours of school you want to search. Below are schools which is available.
-  * `NCHU`：中興大學
+- `school`：要查詢的學校
+- `teacher`：該堂課程的老師
+- `name`：課程名稱
+- `start`：在取得課程名稱陣列、課程心得留言時，因為筆數可能過多，所以每次統一回傳15個。`start`為起始的index，會回傳start~start+15的資料。  
 
-### API usage and Results
+### usage and Results
 
 API使用方式（下面所寫的是api的URL pattern）<br>
 Usage of API (pattern written below is URL pattern)：
 
-1. 簡稱、課程名稱、老師、課號搜尋：  
-取得課程在資料庫的該課程在該校的課程代碼
+1. 取得課程目錄的陣列：_`/sloth/get/clist/`_
 
-  - 範例 (Example)：
-    - `http://www.campass.com.tw/search/?keyword=狼人&school=NCHU`：
-
-        ```
-        ["6686", "6694", "6673"]
-        ```
-    - `http://www.campass.com.tw/search/?keyword=西方+電影&school=NCHU`
-
-      ```
-      ["0302"]
-      ```
-
-2. 複數關鍵字查詢：
-
-  - 範例 (Example)：`http://www.campass.com.tw/search/?keyword=電影+西方&school=NCHU`
+  - 需要指定學校和起始index： `http://127.0.0.1:8000/sloth/get/clist?school=NCHU&start=1`
 
     ```
-    ["0302"]
-    ```
-
-3. 累積關鍵字權重：需要給使用者查詢了哪個`關鍵字`、`課程代碼`、`學校`。例如`普物`這個key在mongodb裏面有非常多堂課程，透過指定`課程代碼`累積權重，下次使用者查詢時，權重高的課程會優先出現。
-
-  - 範例 (Example)：`http://www.campass.com.tw/incWeight/?keyword=普物&code=1108&school=NCHU`
-  - result：
-
-    ```
-    {
-    "_id": "58562b5caaa5b630c0c70e76",
-    "普物": {
-    "NCHU": [
-    {
-      "DBid": 2349,
-      "weight": 55575
-    },
-    {
-      "DBid": 2433,
-      "weight": 700
-    },
-    {
-      "DBid": 2434,
-      "weight": 300
-    }
+    [
+      {
+        "model": "slothTw.course",
+        "fields": {
+          "teacher": "李建福",
+          "avatar": "",
+          "name": "對聯欣賞及創作"
+        },
+        "pk": 2
+      },
+      {
+        "model": "slothTw.course",
+        "fields": {
+          "teacher": "李衛民等",
+          "avatar": "",
+          "name": "動物福祉"
+        },
+        "pk": 3
+      }
+      ...
     ]
-    },
-    "NCHUCourseID": [
-    "1108",
-    "2277"
-    ]
+    ```
+
+2. 取得課程的詳細評分資料：_`/sloth/get/cvalue`_
+
+  - 需要指定`學校、名稱、老師`： `http://127.0.0.1:8000/sloth/get/cvalue?school=NCHU&name=倫理學與當代議題&teacher=翟挹`
+
+    ```
+    {
+      "book": "",
+      "feedback_amount": 2,
+      "school": "NCHU",
+      "teacher": "翟挹",
+      "syllabus": "",
+      "feedback_FU": 2.5,
+      "id": 39,
+      "feedback_freedom": 0.0,
+      "feedback_easy": 2.62,
+      "feedback_knowledgeable": 3.25,
+      "avatar": null,
+      "feedback_GPA": 3.5,
+      "name": "倫理學與當代議題"
     }
+    ```
+
+3. _`/sloth/get/comment`_：取得課程評論的陣列
+
+  - 需要指定學校、老師、課名、起始index： `http://127.0.0.1:8000/sloth/get/comment?school=NCHU&teacher=翟挹&name=倫理學與當代議題&start=1`
+
+    ```
+    [
+      {
+        "model": "slothTw.comment",
+        "fields": {
+          "raw": "考前會給考試範圍\r\n回答問題盡量不要有冗詞",
+          "course": 39,
+          "html": ""
+        },
+        "pk": 58
+      }
+    ]
+    ```
+
+4. _`/put/reply`_：留言到課程心得
+
+  - 需要指定學校、老師、課名： `http://127.0.0.1:8000/put/reply?school=NCHU&teacher=翟挹&name=倫理學與當代議題&start=1`
+
+    ```
+    {'success':True}
     ```
 
 ## Getting Started
@@ -91,39 +113,39 @@ These instructions will get you a copy of the project up and running on your loc
   - Linux：`sudo apt-get update; sudo apt-get install; python3 python3-dev`
   - OSX：`brew install python3`
 
-3. service：need `mongodb`：
-
-  - Linux：`sudo apt-get install mongodb`
-
 ## Installing
 
-1. `pip install curso`
+1. `pip install slothTw`
 
 ## Running & Testing
 
 ## Run
 
-1. `settings.py`裏面需要新增curso這個app：
-  * add this:
-  ```
+1. `settings.py`裏面需要新增`slothTw`這個app：
+
+  - add this:
+
+    ```
     INSTALLED_APPS=[
-        ...
-        ...
-        ...
-        'curso',
+    ...
+    ...
+    ...
+    'slothTw',
     ]
-  ```
+    ```
 
-2. `urls.py`需要新增下列代碼  把所有search開頭的request都導向到curso這個app：
-  * add this:
-  ```
-  import curso.urls
-  urlpatterns += [
-      url(r'^search/', include(curso.urls))
-  ]
-  ```
+2. `urls.py`需要新增下列代碼 把所有search開頭的request都導向到`slothTw`這個app：
 
-3. `python manage.py runserver`：即可進入頁面測試curso是否安裝成功。
+  - add this:
+
+    ```
+    import slothTw.urls
+    urlpatterns += [
+        url(r'^sloth/',include(slothTw.urls,namespace="slothTw") ),
+    ]
+    ```
+
+3. `python manage.py runserver`：即可進入頁面測試 `slothTw` 是否安裝成功。
 
 ### Break down into end to end tests
 
@@ -135,18 +157,14 @@ These instructions will get you a copy of the project up and running on your loc
 
 ## Deployment
 
-`curso` is a django-app, so depends on django project.
+`slothTw` is a django-app, so depends on django project.
 
-`課搜` 是一般的django插件，所以必須依存於django專案
+`怠惰` 是一般的django插件，所以必須依存於django專案
 
 ## Built With
 
+- simplejson
 - djangoApiDec==1.2,
-- jieba==0.38,
-- pymongo==3.4.0,
-- PyPrind==2.9.9,
-- requests==2.12.3,
-- simplejson==3.10.0,
 
 ## Contributors
 
@@ -154,8 +172,8 @@ These instructions will get you a copy of the project up and running on your loc
 
 ## License
 
-This package use `MIT` License.
+This package use `GPL3.0` License.
 
 ## Acknowledgments
 
-感謝`范耀中`老師的指導
+感謝 `剛之煉金術師`給予命名靈感
