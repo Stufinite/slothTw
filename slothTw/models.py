@@ -25,3 +25,5 @@ class Comment(models.Model):
 	html = models.CharField(max_length=600)
 	def __str__(self):
 		return self.raw
+	
+	
