@@ -26,4 +26,10 @@ class Comment(models.Model):
 	def __str__(self):
 		return self.raw
 	
-	
+class Course(models.Model):
+	course = models.CharField(max_length=10,default='')
+	ctype = models.CharField(max_length=10,default='') 
+	time = models.CharField(max_length=10,default='') 
+	teacher = models.CharField(max_length=10,default='')	
+	def __str__(self):  
+		return self.course
