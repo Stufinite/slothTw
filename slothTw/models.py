@@ -1,9 +1,14 @@
 from django.db import models
+import datetime
+# 要取得會員的model要這樣寫
+from userper import Userper
+User = Userper('login.stufinite.faith')
 
 # Create your models here.
 class Course(models.Model):
 	"""docstring for Course"""
 	name = models.CharField(max_length=10)
+	ctype = models.CharField(max_length=10,default='')# 課程是通識必修還是選修
 	avatar = models.ImageField(default='') # 大頭貼照片
 	teacher = models.CharField(max_length=10)
 	school = models.CharField(max_length=10)
@@ -21,15 +26,8 @@ class Course(models.Model):
 
 class Comment(models.Model):
 	course = models.ForeignKey(Course)
+	author = User
+	create = models.DateTimeField(default=datetime.datetime.now)
 	raw = models.CharField(max_length=500)
-	html = models.CharField(max_length=600)
 	def __str__(self):
 		return self.raw
-	
-class Course(models.Model):
-	course = models.CharField(max_length=10,default='')
-	ctype = models.CharField(max_length=10,default='') 
-	time = models.CharField(max_length=10,default='') 
-	teacher = models.CharField(max_length=10,default='')	
-	def __str__(self):  
-		return self.course
