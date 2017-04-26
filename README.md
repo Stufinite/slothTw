@@ -18,6 +18,7 @@ api domain：目前還沒架起來，所以暫定`127.0.0.1`<br>
 - `school`：要查詢的學校
 - `teacher`：該堂課程的老師
 - `name`：課程名稱
+- `id`：課程的id
 - `start`：在取得課程名稱陣列、課程心得留言時，因為筆數可能過多，所以每次統一回傳15個。`start`為起始的index，會回傳start~start+15的資料。  
 
 ### usage and Results
@@ -27,7 +28,9 @@ Usage of API (pattern written below is URL pattern)：
 
 1. 取得課程目錄的陣列：_`/sloth/get/clist/`_
 
-  - 需要指定學校和起始index： `http://127.0.0.1:8000/sloth/get/clist?school=NCHU&start=1`
+  - school
+  - start
+  - example： [http://127.0.0.1:8000/sloth/get/clist?school=NCHU&start=1](http://127.0.0.1:8000/sloth/get/clist?school=nchu&start=1)
 
     ```
     [
@@ -53,9 +56,10 @@ Usage of API (pattern written below is URL pattern)：
     ]
     ```
 
-2. 取得課程的詳細評分資料：_`/sloth/get/cvalue`_
+2. 取得課程的詳細資料：_`/sloth/get/cvalue`_
 
-  - 需要指定`學校、名稱、老師`： `http://127.0.0.1:8000/sloth/get/cvalue?school=NCHU&name=倫理學與當代議題&teacher=翟挹`
+  - id
+  - example：[http://127.0.0.1:8000/sloth/get/cvalue?school=NCHU&name=倫理學與當代議題&teacher=翟挹](http://127.0.0.1:8000/sloth/get/cvalue?school=nchu&name=倫理學與當代議題&teacher=翟挹)
 
     ```
     {
@@ -75,9 +79,81 @@ Usage of API (pattern written below is URL pattern)：
     }
     ```
 
-3. _`/sloth/get/comment`_：取得課程評論的陣列
+3. 查詢該課程的詳細資料，如果查詢不到符合的結果，會回傳符合`name`或者`teacher`的資料：_`/sloth/get/search`_
 
-  - 需要指定學校、老師、課名、起始index： `http://127.0.0.1:8000/sloth/get/comment?school=NCHU&teacher=翟挹&name=倫理學與當代議題&start=1`
+  - school
+  - name
+  - teacher
+  - example：本次查詢沒有輸入完整的課程名稱 `倫理學與當代議題`，只輸入倫理學一樣能搜尋的到[http://127.0.0.1:8000/sloth/get/cvalue?school=NCHU&name=倫理學與&teacher=翟挹](http://127.0.0.1:8000/sloth/get/cvalue?school=nchu&name=倫理學與&teacher=翟挹)
+
+    ```
+    [
+      {
+        "model": "slothTw.course",
+        "pk": 31,
+        "fields": {
+          "name": "倫理學與當代議題",
+          "ctype": "通識",
+          "avatar": "course_4zW59VQ.png",
+          "teacher": "翟挹",
+          "school": "nchu",
+          "book": "教科書配ppt",
+          "syllabus": "暫不提供",
+          "feedback_amount": 2,
+          "feedback_freedom": 0.0,
+          "feedback_FU": 2.5,
+          "feedback_easy": 2.62,
+          "feedback_GPA": 3.5,
+          "feedback_knowledgeable": 3.25
+        }
+      },
+      {
+        "model": "slothTw.course",
+        "pk": 32,
+        "fields": {
+          "name": "倫理學與當代議題",
+          "ctype": "通識",
+          "avatar": "course_4zW59VQ.png",
+          "teacher": "顧毓民",
+          "school": "nchu",
+          "book": "教科書配ppt",
+          "syllabus": "暫不提供",
+          "feedback_amount": 0,
+          "feedback_freedom": 0.0,
+          "feedback_FU": 0.0,
+          "feedback_easy": 0.0,
+          "feedback_GPA": 0.0,
+          "feedback_knowledgeable": 0.0
+        }
+      },
+      {
+        "model": "slothTw.course",
+        "pk": 83,
+        "fields": {
+          "name": "民主與憲政",
+          "ctype": "通識",
+          "avatar": "course_4zW59VQ.png",
+          "teacher": "翟挹",
+          "school": "nchu",
+          "book": "教科書配ppt",
+          "syllabus": "暫不提供",
+          "feedback_amount": 18,
+          "feedback_freedom": 1.09,
+          "feedback_FU": 1.67,
+          "feedback_easy": 2.72,
+          "feedback_GPA": 3.43,
+          "feedback_knowledgeable": 2.95
+        }
+      }
+      ...
+    ]
+    ```
+
+4. _`/sloth/get/comment`_：取得課程評論的陣列
+
+  - id
+  - start
+  - example：[http://127.0.0.1:8000/sloth/get/comment?school=NCHU&teacher=翟挹&name=倫理學與當代議題&start=1](http://127.0.0.1:8000/sloth/get/comment?school=NCHU&teacher=翟挹&name=倫理學與當代議題&start=1)
 
     ```
     [
@@ -90,15 +166,8 @@ Usage of API (pattern written below is URL pattern)：
         },
         "pk": 58
       }
+      ...
     ]
-    ```
-
-4. _`/put/reply`_：留言到課程心得
-
-  - 需要指定學校、老師、課名： `http://127.0.0.1:8000/put/reply?school=NCHU&teacher=翟挹&name=倫理學與當代議題&start=1`
-
-    ```
-    {'success':True}
     ```
 
 ## Getting Started
