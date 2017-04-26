@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import JsonResponse, Http404, HttpResponse
+from django.http import JsonResponse, Http404
 from djangoApiDec.djangoApiDec import queryString_required, date_proc, queryString_required_ClassVersion
 from django.core import serializers
 from django.forms.models import model_to_dict
@@ -12,7 +12,7 @@ import json
 def clist(request):
     start = int(request.GET['start']) -1 
     result = Course.objects.filter(school=request.GET['school'])[start:start+15]
-    return HttpResponse(serializers.serialize('json', list(result), fields=('name', 'avatar', 'teacher')))
+    return JsonResponse(json.loads(serializers.serialize('json', list(result), fields=('name', 'avatar', 'teacher'))), safe=False)
 
 @queryString_required(['id'])
 def cvalue(request):
@@ -32,7 +32,7 @@ def search(request):
     except Exception as e:
         nameList = Course.objects.filter(school=request.GET['school'], name__contains=request.GET['name'])
         teacherList = Course.objects.filter(school=request.GET['school'], teacher__contains=request.GET['teacher'])
-        return HttpResponse(serializers.serialize('json', list(nameList) + list(teacherList)))
+        return JsonResponse(json.loads(serializers.serialize('json', list(nameList) + list(teacherList))), safe=False)
 
 
 # 顯示特定一門課程的留言評論
@@ -42,6 +42,6 @@ def comment(request):
         start = int(request.GET['start']) - 1
         c = Course.objects.get(id=request.GET['id'])
         result = c.comment_set.all()[start:start+15]
-        return HttpResponse(serializers.serialize('json', list(result)))
+        return JsonResponse(json.loads(serializers.serialize('json', list(result))), safe=False)
     except Exception as e:
         raise
