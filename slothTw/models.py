@@ -20,7 +20,7 @@ class Course(models.Model):
 	feedback_easy = models.FloatField(default=0)
 	feedback_GPA = models.FloatField(default=0)
 	feedback_knowledgeable = models.FloatField(default=0)
-
+	# attendee = models.ManyToManyField(User)
 	def __str__(self):
 		return self.name
 
@@ -29,5 +29,6 @@ class Comment(models.Model):
 	author = User
 	create = models.DateTimeField(default=datetime.datetime.now)
 	raw = models.CharField(max_length=500)
+	like = models.PositiveSmallIntegerField(default=0)
 	def __str__(self):
 		return self.raw

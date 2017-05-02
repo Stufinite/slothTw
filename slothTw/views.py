@@ -5,6 +5,7 @@ from django.core import serializers
 from django.forms.models import model_to_dict
 from slothTw.models import *
 from django.views import View
+from django.db.models import F
 import json
 
 # Create your views here.
@@ -45,3 +46,29 @@ def comment(request):
         return JsonResponse(json.loads(serializers.serialize('json', list(result))), safe=False)
     except Exception as e:
         raise
+
+@queryString_required(['id'])
+def like(request):
+    request.GET = request.GET.copy()
+    request.GET['start'] = 15
+    if request.POST:
+        if request.POST.dict()['like'] == '1':
+            Comment.objects.filter(id=request.GET['id']).update(like=F('like') + 1)
+            return comment(request)
+
+@queryString_required(['id'])
+def questionnaire(request):
+    id = request.GET['id']
+    c = Course.objects.get(id=id)
+    if request.method == 'POST' and request.POST:
+        if 'rating' in request.POST:
+            data = json.loads(request.POST.dict()['rating'])
+            amount = c.feedback_amount + 1
+            modelDict = {'feedback_amount':amount}
+            modelDict['feedback_freedom'] = (c.feedback_freedom*(amount-1) + (data[0]*3/4 + data[1]/4)) /amount
+            modelDict['feedback_GPA'] = (c.feedback_GPA*(amount-1) + data[2]) / amount
+            modelDict['feedback_easy'] = (c.feedback_easy*(amount-1) + (data[3]/12 + data[4]/12  + data[7]*9/12 + data[8]/12)) / amount
+            modelDict['feedback_knowledgeable'] = (c.feedback_knowledgeable*(amount-1) + data[6]) / amount
+            modelDict['feedback_FU'] = (c.feedback_FU*(amount-1) + data[5]) / amount
+            Course.objects.update_or_create(id=id, defaults=modelDict)
+            return cvalue(request)
