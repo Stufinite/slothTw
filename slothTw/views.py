@@ -11,9 +11,13 @@ import json
 # Create your views here.
 @queryString_required(['school', 'start'])
 def clist(request):
-    start = int(request.GET['start']) -1 
-    result = Course.objects.filter(school=request.GET['school'])[start:start+15]
-    return JsonResponse(json.loads(serializers.serialize('json', list(result), fields=('name', 'avatar', 'teacher'))), safe=False)
+    start = int(request.GET['start']) -1
+    ctype = request.GET['ctype'] if 'ctype' in request.GET else '通識'
+
+    result = Course.objects.filter(school=request.GET['school'], ctype=ctype)
+    length = len(result) // 15
+    result = result[start:start+15]
+    return JsonResponse([{'TotalPage':length, 'school':request.GET['school'], 'ctype':ctype}] + json.loads(serializers.serialize('json', list(result), fields=('name', 'ctype', 'avatar', 'teacher', 'school', 'feedback_amount'))), safe=False)
 
 @queryString_required(['id'])
 def cvalue(request):
