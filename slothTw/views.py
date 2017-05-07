@@ -40,7 +40,10 @@ def search(request):
     except Exception as e:
         nameList = Course.objects.filter(school=request.GET['school'], name__contains=request.GET['name'])[:5]
         teacherList = Course.objects.filter(school=request.GET['school'], teacher__contains=request.GET['teacher'])[:5]
-        return JsonResponse(json.loads(serializers.serialize('json', list(nameList) + list(teacherList))), safe=False)
+        result = json.loads(serializers.serialize('json', nameList, fields=('name', 'ctype', 'avatar', 'teacher', 'school', 'feedback_amount'))) + json.loads(serializers.serialize('json', teacherList, fields=('name', 'ctype', 'avatar', 'teacher', 'school', 'feedback_amount')))
+        for index, i in enumerate(list(nameList) + list(teacherList)):
+            result[index]['fields']['avatar'] = i.avatar.url
+        return JsonResponse(result, safe=False)
 
 
 # 顯示特定一門課程的留言評論
