@@ -14,10 +14,13 @@ def clist(request):
     start = int(request.GET['start']) -1
     ctype = request.GET['ctype'] if 'ctype' in request.GET else '通識'
 
-    result = Course.objects.filter(school=request.GET['school'], ctype=ctype)
-    length = len(result) // 15
-    result = result[start:start+15]
-    return JsonResponse([{'TotalPage':length, 'school':request.GET['school'], 'ctype':ctype}] + json.loads(serializers.serialize('json', list(result), fields=('name', 'ctype', 'avatar', 'teacher', 'school', 'feedback_amount'))), safe=False)
+    querySet = Course.objects.filter(school=request.GET['school'], ctype=ctype)
+    length = len(querySet) // 15
+    querySet = querySet[start:start+15]
+    result = json.loads(serializers.serialize('json', list(querySet[start:start+15]), fields=('name', 'ctype', 'avatar', 'teacher', 'school', 'feedback_amount')))
+    for index, i in enumerate(querySet):
+        result[index]['fields']['avatar'] = i.avatar.url
+    return JsonResponse([{'TotalPage':length, 'school':request.GET['school'], 'ctype':ctype}] + result, safe=False)
 
 @queryString_required(['id'])
 def cvalue(request):
@@ -35,8 +38,8 @@ def search(request):
         result['avatar'] = result['avatar'].url if result['avatar'] else None
         return JsonResponse([result], safe=False)
     except Exception as e:
-        nameList = Course.objects.filter(school=request.GET['school'], name__contains=request.GET['name'])
-        teacherList = Course.objects.filter(school=request.GET['school'], teacher__contains=request.GET['teacher'])
+        nameList = Course.objects.filter(school=request.GET['school'], name__contains=request.GET['name'])[:5]
+        teacherList = Course.objects.filter(school=request.GET['school'], teacher__contains=request.GET['teacher'])[:5]
         return JsonResponse(json.loads(serializers.serialize('json', list(nameList) + list(teacherList))), safe=False)
 
 
