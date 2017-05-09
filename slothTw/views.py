@@ -8,6 +8,9 @@ from django.views import View
 from django.db.models import F
 import json
 
+
+AMOUNT_NUM = 10
+SEARCH_NUM = 5
 # Create your views here.
 @queryString_required(['school', 'start'])
 def clist(request):
@@ -15,11 +18,11 @@ def clist(request):
     ctype = request.GET['ctype'] if 'ctype' in request.GET else '通識'
 
     querySet = Course.objects.filter(school=request.GET['school'], ctype=ctype)
-    length = len(querySet) // 15
-    querySet = querySet[start:start+15]
-    result = json.loads(serializers.serialize('json', list(querySet[start:start+15]), fields=('name', 'ctype', 'avatar', 'teacher', 'school', 'feedback_amount')))
-    for index, i in enumerate(querySet):
-        result[index]['fields']['avatar'] = i.avatar.url
+    length = len(querySet) // AMOUNT_NUM
+    querySet = querySet[start:start+AMOUNT_NUM]
+    result = json.loads(serializers.serialize('json', list(querySet), fields=('name', 'ctype', 'avatar', 'teacher', 'school', 'feedback_amount')))
+    for r, q in zip(result, querySet):
+        r['fields']['avatar'] = q.avatar.url
     return JsonResponse([{'TotalPage':length, 'school':request.GET['school'], 'ctype':ctype}] + result, safe=False)
 
 @queryString_required(['id'])
@@ -38,11 +41,11 @@ def search(request):
         result['avatar'] = result['avatar'].url if result['avatar'] else None
         return JsonResponse([result], safe=False)
     except Exception as e:
-        nameList = Course.objects.filter(school=request.GET['school'], name__contains=request.GET['name'])[:5]
-        teacherList = Course.objects.filter(school=request.GET['school'], teacher__contains=request.GET['teacher'])[:5]
+        nameList = Course.objects.filter(school=request.GET['school'], name__contains=request.GET['name'])[:SEARCH_NUM]
+        teacherList = Course.objects.filter(school=request.GET['school'], teacher__contains=request.GET['teacher'])[:SEARCH_NUM]
         result = json.loads(serializers.serialize('json', nameList, fields=('name', 'ctype', 'avatar', 'teacher', 'school', 'feedback_amount'))) + json.loads(serializers.serialize('json', teacherList, fields=('name', 'ctype', 'avatar', 'teacher', 'school', 'feedback_amount')))
-        for index, i in enumerate(list(nameList) + list(teacherList)):
-            result[index]['fields']['avatar'] = i.avatar.url
+        for r, i in zip(result, list(nameList) + list(teacherList)):
+            r['fields']['avatar'] = i.avatar.url
         return JsonResponse(result, safe=False)
 
 
@@ -52,7 +55,7 @@ def comment(request):
     try:
         start = int(request.GET['start']) - 1
         c = Course.objects.get(id=request.GET['id'])
-        result = c.comment_set.all()[start:start+15]
+        result = c.comment_set.all()[start:start+AMOUNT_NUM]
         return JsonResponse(json.loads(serializers.serialize('json', list(result))), safe=False)
     except Exception as e:
         raise
@@ -60,7 +63,7 @@ def comment(request):
 @queryString_required(['id'])
 def like(request):
     request.GET = request.GET.copy()
-    request.GET['start'] = 15
+    request.GET['start'] = 1
     if request.POST:
         if request.POST.dict()['like'] == '1':
             Comment.objects.filter(id=request.GET['id']).update(like=F('like') + 1)
