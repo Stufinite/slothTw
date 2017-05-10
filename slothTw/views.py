@@ -18,7 +18,7 @@ def clist(request):
     ctype = request.GET['ctype'] if 'ctype' in request.GET else '通識'
 
     querySet = Course.objects.filter(school=request.GET['school'], ctype=ctype)
-    length = len(querySet) // AMOUNT_NUM
+    length = len(querySet) // AMOUNT_NUM +1
     querySet = querySet[start:start+AMOUNT_NUM]
     result = json.loads(serializers.serialize('json', list(querySet), fields=('name', 'ctype', 'avatar', 'teacher', 'school', 'feedback_amount')))
     for r, q in zip(result, querySet):
