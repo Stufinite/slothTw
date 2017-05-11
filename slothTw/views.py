@@ -65,8 +65,8 @@ def like(request):
     request.GET = request.GET.copy()
     request.GET['start'] = 1
     if request.POST:
-        if request.POST.dict()['like'] == '1':
-            Comment.objects.filter(id=request.GET['id']).update(like=F('like') + 1)
+        if request.POST.dict()['like'] == '1' or request.POST.dict()['like'] == '-1':
+            Comment.objects.filter(id=request.GET['id']).update(like=F('like') + int(request.POST.dict()['like']))
             return comment(request)
 
 @queryString_required(['id'])
