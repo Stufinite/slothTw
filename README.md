@@ -170,6 +170,62 @@ Usage of API (pattern written below is URL pattern)：
     ]
     ```
 
+另外可以結合d3-js畫出課程心得雷達圖：
+
+1. 需要 radar-chart-d3：`<script src="your path/radar-chart-d3/src/radar-chart.min.js" ></script>`
+    * use [bower](https://bower.io/)（recommended）:`bower install radar-chart-d3`
+2. 插入這段tag到想要顯示雷達圖的地方：`<div class="chart-container"></div>`
+3. 執行下列js code：
+    ```
+    async function run(){
+      function getCourseInfo(){
+          id = location.search.split('id=')[1]
+          return new Promise(function(resolve, reject){
+              $.getJSON( "/sloth/get/cvalue?id="+id, function( j ) {
+              }).done(result => {
+                  resolve(result);
+              });
+          });
+      }
+      var result = await getCourseInfo();
+      data = [
+        {
+            axes: [
+            {axis: "自由", value: result['feedback_freedom']},
+            {axis: "知識性", value: result['feedback_knowledgeable']},
+            {axis: "氛圍", value: result['feedback_FU']},
+            {axis: "成績", value: result['feedback_GPA']},
+            {axis: "簡單", value: result['feedback_easy']}
+            ]
+        }
+      ]
+
+      var chart = RadarChart.chart();
+      chart.config({
+        containerClass: 'radar-chart', // target with css, the default stylesheet targets .radar-chart
+        w: 200,
+        h: 200,
+        factor: 0.9,
+        factorLegend: 1,
+        levels: 5,
+        maxValue: 5,
+        minValue: 0,
+      });
+
+      var svg = d3.select('.chart-container').append('svg')
+        .attr('width', 200)
+        .attr('height', 200);
+
+      // draw one
+      svg = svg.append('g').classed('focus', 3).datum(data)
+      svg.call(chart)
+      d3.selectAll(".axis text").style("font-size","14px")
+    }
+    run();
+    ```
+結果：
+![雷達圖](radar.png)
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
