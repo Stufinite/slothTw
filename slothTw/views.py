@@ -34,18 +34,18 @@ def cvalue(request):
     except Exception as e:
         raise
 
-@queryString_required(['school', 'name', 'teacher'])
+@queryString_required(['school', 'keyword'])
 def search(request):
-    nameList = Course.objects.filter(school=request.GET['school'], name__contains=request.GET['name'])[:SEARCH_NUM]
-    teacherList = Course.objects.filter(school=request.GET['school'], teacher__contains=request.GET['teacher'])[:SEARCH_NUM]
+    nameList = Course.objects.filter(school=request.GET['school'], name__contains=request.GET['keyword'])[:SEARCH_NUM]
+    teacherList = Course.objects.filter(school=request.GET['school'], teacher__contains=request.GET['keyword'])[:SEARCH_NUM]
     result = json.loads(serializers.serialize('json', nameList, fields=('name', 'ctype', 'avatar', 'teacher', 'school', 'feedback_amount'))) + json.loads(serializers.serialize('json', teacherList, fields=('name', 'ctype', 'avatar', 'teacher', 'school', 'feedback_amount')))
     for r, i in zip(result, list(nameList) + list(teacherList)):
         r['fields']['avatar'] = i.avatar.url
     if len(result) == 0:
         nlpapi_Expand =  list(itertools.chain(
             *itertools.chain(*zip(
-                requests.get('http://140.120.13.244:10000/kem/?keyword={}&lang=cht'.format(request.GET['name'])).json(), 
-                requests.get('http://140.120.13.244:10000/kcm/?keyword={}&lang=cht'.format(request.GET['name'])).json())
+                requests.get('http://140.120.13.244:10000/kem/?keyword={}&lang=cht'.format(request.GET['keyword'])).json(), 
+                requests.get('http://140.120.13.244:10000/kcm/?keyword={}&lang=cht'.format(request.GET['keyword'])).json())
             )
         ))[::2]
         nlpapiList = []
