@@ -6,7 +6,7 @@ from django.forms.models import model_to_dict
 from slothTw.models import *
 from django.views import View
 from django.db.models import F
-import json
+import json, requests, itertools
 
 
 AMOUNT_NUM = 10
@@ -36,17 +36,25 @@ def cvalue(request):
 
 @queryString_required(['school', 'name', 'teacher'])
 def search(request):
-    try:
-        result = model_to_dict(Course.objects.get(school=request.GET['school'], name=request.GET['name'],teacher=request.GET['teacher']))
-        result['avatar'] = result['avatar'].url if result['avatar'] else None
-        return JsonResponse([result], safe=False)
-    except Exception as e:
-        nameList = Course.objects.filter(school=request.GET['school'], name__contains=request.GET['name'])[:SEARCH_NUM]
-        teacherList = Course.objects.filter(school=request.GET['school'], teacher__contains=request.GET['teacher'])[:SEARCH_NUM]
-        result = json.loads(serializers.serialize('json', nameList, fields=('name', 'ctype', 'avatar', 'teacher', 'school', 'feedback_amount'))) + json.loads(serializers.serialize('json', teacherList, fields=('name', 'ctype', 'avatar', 'teacher', 'school', 'feedback_amount')))
-        for r, i in zip(result, list(nameList) + list(teacherList)):
+    nameList = Course.objects.filter(school=request.GET['school'], name__contains=request.GET['name'])[:SEARCH_NUM]
+    teacherList = Course.objects.filter(school=request.GET['school'], teacher__contains=request.GET['teacher'])[:SEARCH_NUM]
+    result = json.loads(serializers.serialize('json', nameList, fields=('name', 'ctype', 'avatar', 'teacher', 'school', 'feedback_amount'))) + json.loads(serializers.serialize('json', teacherList, fields=('name', 'ctype', 'avatar', 'teacher', 'school', 'feedback_amount')))
+    for r, i in zip(result, list(nameList) + list(teacherList)):
+        r['fields']['avatar'] = i.avatar.url
+    if len(result) == 0:
+        nlpapi_Expand =  list(itertools.chain(
+            *itertools.chain(*zip(
+                requests.get('http://140.120.13.244:10000/kem/?keyword={}&lang=cht'.format(request.GET['name'])).json(), 
+                requests.get('http://140.120.13.244:10000/kcm/?keyword={}&lang=cht'.format(request.GET['name'])).json())
+            )
+        ))[::2]
+        nlpapiList = []
+        for i in nlpapi_Expand:
+            nlpapiList += list(Course.objects.filter(school=request.GET['school'], name__contains=i)[:SEARCH_NUM])
+        result = json.loads(serializers.serialize('json', nlpapiList, fields=('name', 'ctype', 'avatar', 'teacher', 'school', 'feedback_amount')))
+        for r, i in zip(result, nlpapiList):
             r['fields']['avatar'] = i.avatar.url
-        return JsonResponse(result, safe=False)
+    return JsonResponse(result, safe=False)
 
 
 # 顯示特定一門課程的留言評論
