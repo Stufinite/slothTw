@@ -7,6 +7,7 @@ from slothTw.models import *
 from django.views import View
 from django.db.models import F
 import json, requests, itertools
+from infernoWeb.models import User
 
 
 AMOUNT_NUM = 10
@@ -28,7 +29,7 @@ def clist(request):
 @queryString_required(['id'])
 def cvalue(request):
     try:
-        result = model_to_dict(Course.objects.get(id=request.GET['id']))
+        result = model_to_dict(Course.objects.get(id=request.GET['id']), exclude='attendee')
         result['avatar'] = result['avatar'].url if result['avatar'] else None
         return JsonResponse(result, safe=False)
     except Exception as e:
@@ -63,8 +64,14 @@ def comment(request):
     try:
         start = int(request.GET['start']) - 1
         c = Course.objects.get(id=request.GET['id'])
-        result = c.comment_set.all()[start:start+AMOUNT_NUM]
-        return JsonResponse(json.loads(serializers.serialize('json', list(result))), safe=False)
+        comments = c.comment_set.all()[start:start+AMOUNT_NUM]
+
+        result = []
+        for i, j in zip(json.loads(serializers.serialize('json', comments, use_natural_foreign_keys=True, use_natural_primary_keys=True)), comments):
+            i['fields']['likesfromuser'] = list(map(lambda x:x.author.facebookid, j.likesfromuser_set.all()))
+            result.append(i)
+
+        return JsonResponse(result, safe=False)
     except Exception as e:
         raise
 
@@ -73,9 +80,15 @@ def like(request):
     request.GET = request.GET.copy()
     request.GET['start'] = 1
     if request.POST:
-        if request.POST.dict()['like'] == '1' or request.POST.dict()['like'] == '-1':
-            Comment.objects.filter(id=request.GET['id']).update(like=F('like') + int(request.POST.dict()['like']))
-            return comment(request)
+        if request.POST['like'] == '1':
+            Comment.objects.filter(id=request.GET['id']).update(like=F('like') + int(request.POST['like']))
+            obj, created = LikesFromUser.objects.get_or_create(author=User.objects.get(facebookid=request.POST['facebookid']))
+            obj.comment.add(Comment.objects.get(id=request.GET['id']))
+            return JsonResponse({"like":'success'})
+        elif request.POST['like'] == '-1':
+            Comment.objects.filter(id=request.GET['id']).update(like=F('like') + int(request.POST['like']))
+            LikesFromUser.objects.get(author=User.objects.get(facebookid=request.POST['facebookid'])).comment.remove(Comment.objects.get(id=request.GET['id']))
+            return JsonResponse({"like":'success'})
 
 @queryString_required(['id'])
 def questionnaire(request):
@@ -83,7 +96,7 @@ def questionnaire(request):
     c = Course.objects.get(id=id)
     if request.method == 'POST' and request.POST:
         if 'rating' in request.POST:
-            data = json.loads(request.POST.dict()['rating'])
+            data = json.loads(request.POST['rating'])
             amount = c.feedback_amount + 1
             modelDict = {'feedback_amount':amount}
             modelDict['feedback_freedom'] = (c.feedback_freedom*(amount-1) + (data[0]*3/4 + data[1]/4)) /amount
