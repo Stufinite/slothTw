@@ -8,7 +8,7 @@ from django.views import View
 from django.db.models import F
 import json, requests, itertools
 from infernoWeb.models import User
-from infernoWeb.view.inferno import user_verify, createUser
+from infernoWeb.view.inferno import user_verify
 
 AMOUNT_NUM = 10
 SEARCH_NUM = 5
@@ -75,15 +75,6 @@ def comment(request):
     except Exception as e:
         raise
 
-# 顯示特定一門課程的留言評論
-@user_verify
-def CreateComment(request):
-    id = request.GET['id']
-    c = Course.objects.get(id=id)
-    if len(c.comment_set.all().filter(author=User.objects.get(facebookid=request.POST['id'])))==0:
-        Comment.objects.create(course=c, author=User.objects.get(facebookid=request.POST['id']) , create=datetime.datetime.now(), raw=request.POST['comments'], emotion=request.POST['emotion'])
-        return True
-    return False
 
 @queryString_required(['id'])
 @user_verify
@@ -120,3 +111,17 @@ def questionnaire(request):
             modelDict['feedback_FU'] = (c.feedback_FU*(amount-1) + data[5]) / amount
             Course.objects.update_or_create(id=id, defaults=modelDict)
             return cvalue(request)
+
+
+# 建立特定一門課程的留言評論
+@user_verify
+def CreateComment(request):
+    id = request.GET['id']
+    c = Course.objects.get(id=id)
+    if len(c.comment_set.all().filter(author=User.objects.get(facebookid=request.POST['id'])))==0:
+        Comment.objects.create(course=c, author=User.objects.get(facebookid=request.POST['id']) , create=datetime.datetime.now(), raw=request.POST['comments'], emotion=request.POST['emotion'])
+        return True
+    return False
+
+def logPage(request):
+    PageLog.objects.create(user=User.objects.get(facebookid=request.POST['id']), course=Course.objects.get(id=request.GET['id']), create=datetime.datetime.now())

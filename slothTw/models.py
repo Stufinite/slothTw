@@ -43,13 +43,14 @@ class Comment(models.Model):
         return self.raw
 
 class LikesFromUser(models.Model):
-    comment = models.ManyToManyField(Comment)
-    course = models.ManyToManyField(Course)
     author = models.OneToOneField(User)
+    comment = models.ManyToManyField(Comment)
     def __str__(self):
         return self.author.name
 
 class PageLog(models.Model):
-    user = models.ForeignKey(LikesFromUser)
-    course = models.OneToOneField(Course)
+    user = models.ForeignKey(User)
+    course = models.ForeignKey(Course)
     create = models.DateTimeField(default=datetime.datetime.now)
+    def __str__(self):
+        return self.user.name + self.course.name + self.create.date().__str__()

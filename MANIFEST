@@ -20,4 +20,5 @@ slothTw/migrations/0009_auto_20170604_2229.py
 slothTw/migrations/0010_likesfromuser.py
 slothTw/migrations/0011_auto_20170606_1524.py
 slothTw/migrations/0012_auto_20170612_1740.py
+slothTw/migrations/0013_auto_20170612_2146.py
 slothTw/migrations/__init__.py

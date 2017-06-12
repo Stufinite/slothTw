@@ -12,3 +12,4 @@ class CommentAdmin(admin.ModelAdmin):
 admin.site.register(Course, CourseAdmin)
 admin.site.register(Comment, CommentAdmin)
 admin.site.register(LikesFromUser)
+admin.site.register(PageLog)
