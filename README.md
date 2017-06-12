@@ -79,11 +79,11 @@ Usage of API (pattern written below is URL pattern)：
     }
     ```
 
-3. 查詢該課程的詳細資料，如果查詢不到符合的結果，會回傳符合`name`或者`teacher`的資料：_`/sloth/get/search`_
+3. 課程查詢api ，輸入`keyword`後，會用此欄位比對`name`和`teacher`的字串，如果其中一個有符合就會回傳查詢結果的陣列
+：_`/sloth/get/search`_
 - school
-- name
-- teacher
-- example：本次查詢沒有輸入完整的課程名稱 `倫理學與當代議題`，只輸入倫理學一樣能搜尋的到[http://127.0.0.1:8000/sloth/get/search?school=nchu&keyword=%E5%80%AB%E7%90%86%E5%AD%B8](http://127.0.0.1:8000/sloth/get/search?school=nchu&keyword=%E5%80%AB%E7%90%86%E5%AD%B8)
+- keyword
+- example：本次查詢沒有輸入完整的課程名稱 `倫理學與當代議題`，只輸入倫理學一樣能搜尋的到[http://127.0.0.1:8000/sloth/get/search?school=nchu&keyword=倫理學](http://127.0.0.1:8000/sloth/get/search?school=nchu&keyword=倫理學)
 
     ```
     [
