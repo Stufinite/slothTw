@@ -59,7 +59,7 @@ Usage of API (pattern written below is URL pattern)：
 2. 取得課程的詳細資料：_`/sloth/get/cvalue`_
 
   - id
-  - example：[http://127.0.0.1:8000/sloth/get/cvalue?school=NCHU&name=倫理學與當代議題&teacher=翟挹](http://127.0.0.1:8000/sloth/get/cvalue?school=nchu&name=倫理學與當代議題&teacher=翟挹)
+  - example：[http://127.0.0.1:8000/sloth/get/cvalue?school=nchu&id=3](http://127.0.0.1:8000/sloth/get/cvalue?school=nchu&id=3)
 
     ```
     {
@@ -80,11 +80,10 @@ Usage of API (pattern written below is URL pattern)：
     ```
 
 3. 查詢該課程的詳細資料，如果查詢不到符合的結果，會回傳符合`name`或者`teacher`的資料：_`/sloth/get/search`_
-
-  - school
-  - name
-  - teacher
-  - example：本次查詢沒有輸入完整的課程名稱 `倫理學與當代議題`，只輸入倫理學一樣能搜尋的到[http://127.0.0.1:8000/sloth/get/cvalue?school=NCHU&name=倫理學與&teacher=翟挹](http://127.0.0.1:8000/sloth/get/cvalue?school=nchu&name=倫理學與&teacher=翟挹)
+- school
+- name
+- teacher
+- example：本次查詢沒有輸入完整的課程名稱 `倫理學與當代議題`，只輸入倫理學一樣能搜尋的到[http://127.0.0.1:8000/sloth/get/search?school=nchu&keyword=%E5%80%AB%E7%90%86%E5%AD%B8](http://127.0.0.1:8000/sloth/get/search?school=nchu&keyword=%E5%80%AB%E7%90%86%E5%AD%B8)
 
     ```
     [
@@ -153,7 +152,7 @@ Usage of API (pattern written below is URL pattern)：
 
   - id
   - start
-  - example：[http://127.0.0.1:8000/sloth/get/comment?school=NCHU&teacher=翟挹&name=倫理學與當代議題&start=1](http://127.0.0.1:8000/sloth/get/comment?school=NCHU&teacher=翟挹&name=倫理學與當代議題&start=1)
+  - example：[/sloth/get/comment?id=4&start=1](/sloth/get/comment?id=4&start=1)
 
     ```
     [
