@@ -8,7 +8,7 @@ from django.views import View
 from django.db.models import F
 import json, requests, itertools
 from infernoWeb.models import User
-
+from infernoWeb.view.inferno import user_verify, createUser
 
 AMOUNT_NUM = 10
 SEARCH_NUM = 5
@@ -75,22 +75,36 @@ def comment(request):
     except Exception as e:
         raise
 
+# 顯示特定一門課程的留言評論
+@user_verify
+def CreateComment(request):
+    id = request.GET['id']
+    c = Course.objects.get(id=id)
+    if len(c.comment_set.all().filter(author=User.objects.get(facebookid=request.POST['id'])))==0:
+        Comment.objects.create(course=c, author=User.objects.get(facebookid=request.POST['id']) , create=datetime.datetime.now(), raw=request.POST['comments'], emotion=request.POST['emotion'])
+        return True
+    return False
+
 @queryString_required(['id'])
+@user_verify
 def like(request):
     request.GET = request.GET.copy()
     request.GET['start'] = 1
     if request.POST:
+        user = User.objects.get(facebookid=request.POST['id'])
         if request.POST['like'] == '1':
-            Comment.objects.filter(id=request.GET['id']).update(like=F('like') + int(request.POST['like']))
-            obj, created = LikesFromUser.objects.get_or_create(author=User.objects.get(facebookid=request.POST['facebookid']))
-            obj.comment.add(Comment.objects.get(id=request.GET['id']))
+            target = Comment.objects.filter(id=request.GET['id'])
+            target.update(like=F('like') + int(request.POST['like']))
+            obj, created = LikesFromUser.objects.get_or_create(author=user)
+            obj.comment.add(target[0])
             return JsonResponse({"like":'success'})
         elif request.POST['like'] == '-1':
             Comment.objects.filter(id=request.GET['id']).update(like=F('like') + int(request.POST['like']))
-            LikesFromUser.objects.get(author=User.objects.get(facebookid=request.POST['facebookid'])).comment.remove(Comment.objects.get(id=request.GET['id']))
+            LikesFromUser.objects.get(author=user).comment.remove(Comment.objects.get(id=request.GET['id']))
             return JsonResponse({"like":'success'})
 
 @queryString_required(['id'])
+@user_verify
 def questionnaire(request):
     id = request.GET['id']
     c = Course.objects.get(id=id)

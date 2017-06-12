@@ -15,4 +15,8 @@ slothTw/migrations/0004_comment_like.py
 slothTw/migrations/0005_auto_20170523_1039.py
 slothTw/migrations/0006_course_dept.py
 slothTw/migrations/0007_remove_course_syllabus.py
+slothTw/migrations/0008_comment_emotion.py
+slothTw/migrations/0009_auto_20170604_2229.py
+slothTw/migrations/0010_likesfromuser.py
+slothTw/migrations/0011_auto_20170606_1524.py
 slothTw/migrations/__init__.py
