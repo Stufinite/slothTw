@@ -100,6 +100,8 @@ def questionnaire(request):
     id = request.GET['id']
     c = Course.objects.get(id=id)
     if request.method == 'POST' and request.POST:
+        if User.objects.get(facebookid=request.POST['id']) in c.attendee.all():
+            return JsonResponse({'alreadySubmit':True})
         if 'rating' in request.POST:
             data = json.loads(request.POST['rating'])
             amount = c.feedback_amount + 1
@@ -110,7 +112,8 @@ def questionnaire(request):
             modelDict['feedback_knowledgeable'] = (c.feedback_knowledgeable*(amount-1) + data[6]) / amount
             modelDict['feedback_FU'] = (c.feedback_FU*(amount-1) + data[5]) / amount
             Course.objects.update_or_create(id=id, defaults=modelDict)
-            return cvalue(request)
+            Course.objects.get(id=id).attendee.add(User.objects.get(facebookid=request.POST['id']))
+            return JsonResponse({'submitSuccess':True})
 
 
 # 建立特定一門課程的留言評論
