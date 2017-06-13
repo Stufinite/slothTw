@@ -1,10 +1,9 @@
-from django.shortcuts import render
-from django.http import JsonResponse, Http404
-from djangoApiDec.djangoApiDec import queryString_required, date_proc, queryString_required_ClassVersion
+from django.http import JsonResponse
+from djangoApiDec.djangoApiDec import queryString_required
 from django.core import serializers
 from django.forms.models import model_to_dict
+from django.utils import timezone
 from slothTw.models import *
-from django.views import View
 from django.db.models import F
 import json, requests, itertools
 from infernoWeb.models import User
@@ -122,9 +121,9 @@ def CreateComment(request):
     id = request.GET['id']
     c = Course.objects.get(id=id)
     if len(c.comment_set.all().filter(author=User.objects.get(facebookid=request.POST['id'])))==0:
-        Comment.objects.create(course=c, author=User.objects.get(facebookid=request.POST['id']) , create=datetime.datetime.now(), raw=request.POST['comments'], emotion=request.POST['emotion'])
+        Comment.objects.create(course=c, author=User.objects.get(facebookid=request.POST['id']) , create=timezone.now(), raw=request.POST['comments'], emotion=request.POST['emotion'])
         return True
     return False
 
 def logPage(request):
-    PageLog.objects.create(user=User.objects.get(facebookid=request.POST['id']), course=Course.objects.get(id=request.GET['id']), create=datetime.datetime.now())
+    PageLog.objects.create(user=User.objects.get(facebookid=request.POST['id']), course=Course.objects.get(id=request.GET['id']), create=timezone.now())

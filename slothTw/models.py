@@ -1,8 +1,7 @@
 from django.db import models
 from infernoWeb.models import User
-import datetime
+from django.utils import timezone
 # 要取得會員的model要這樣寫
-
 # Create your models here.
 class Course(models.Model):
     """docstring for Course"""
@@ -27,7 +26,7 @@ class Course(models.Model):
 class Comment(models.Model):
     course = models.ForeignKey(Course)
     author = models.ForeignKey(User)
-    create = models.DateTimeField(default=datetime.datetime.now)
+    create = models.DateTimeField(default=timezone.now)
     raw = models.CharField(max_length=500)
     like = models.PositiveSmallIntegerField(default=0)
     emotion = models.CharField(
@@ -51,6 +50,6 @@ class LikesFromUser(models.Model):
 class PageLog(models.Model):
     user = models.ForeignKey(User)
     course = models.ForeignKey(Course)
-    create = models.DateTimeField(default=datetime.datetime.now)
+    create = models.DateTimeField(default=timezone.now)
     def __str__(self):
         return self.user.name + self.course.name + self.create.date().__str__()
