@@ -27,7 +27,7 @@ class Comment(models.Model):
     course = models.ForeignKey(Course)
     author = models.ForeignKey(User)
     create = models.DateTimeField(default=timezone.now)
-    raw = models.CharField(max_length=500)
+    raw = models.CharField(max_length=1000)
     like = models.PositiveSmallIntegerField(default=0)
     emotion = models.CharField(
         max_length=7,
