@@ -37,9 +37,10 @@ def cvalue(request):
 @queryString_required(['school', 'keyword'])
 def search(request):
     if 'teacher' in request.GET:
-        result = model_to_dict(Course.objects.get(teacher=request.GET['teacher'], name=request.GET['keyword']), exclude='attendee')
-        result['avatar'] = result['avatar'].url if result['avatar'] else None
-        return JsonResponse([result], safe=False)
+        target = [Course.objects.get(teacher=request.GET['teacher'], name=request.GET['keyword'])]
+        result = json.loads(serializers.serialize('json', target, fields=('name', 'ctype', 'avatar', 'teacher', 'school', 'feedback_amount')))
+        result[0]['fields']['avatar'] = target[0].avatar.url
+        return JsonResponse(result, safe=False)
     nameList = Course.objects.filter(school=request.GET['school'], name__contains=request.GET['keyword'])[:SEARCH_NUM]
     teacherList = Course.objects.filter(school=request.GET['school'], teacher__contains=request.GET['keyword'])[:SEARCH_NUM]
     result = json.loads(serializers.serialize('json', nameList, fields=('name', 'ctype', 'avatar', 'teacher', 'school', 'feedback_amount'))) + json.loads(serializers.serialize('json', teacherList, fields=('name', 'ctype', 'avatar', 'teacher', 'school', 'feedback_amount')))
