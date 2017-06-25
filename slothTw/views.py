@@ -67,7 +67,7 @@ def search(request):
 def comment(request):
     try:
         start = int(request.GET['start']) - 1
-        c = Course.objects.get(id=request.GET['id'])
+        c = Course.objects.prefetch_related('comment_set').get(id=request.GET['id'])
         comments = c.comment_set.all()[start:start+AMOUNT_NUM]
 
         result = []
@@ -119,12 +119,12 @@ def questionnaire(request):
             Course.objects.get(id=id).attendee.add(User.objects.get(facebookid=request.POST['id']))
             return JsonResponse({'submitSuccess':True})
 
-
 # 建立特定一門課程的留言評論
 @user_verify
+@queryString_required(['id'])
 def CreateComment(request):
     id = request.GET['id']
-    c = Course.objects.get(id=id)
+    c = Course.objects.prefetch_related('comment_set').get(id=id)
     if len(c.comment_set.all().filter(author=User.objects.get(facebookid=request.POST['id'])))==0:
         Comment.objects.create(course=c, author=User.objects.get(facebookid=request.POST['id']) , create=timezone.now(), raw=request.POST['comments'], emotion=request.POST['emotion'])
         return True
