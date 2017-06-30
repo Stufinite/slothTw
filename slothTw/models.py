@@ -5,7 +5,7 @@ from django.utils import timezone
 # Create your models here.
 class Course(models.Model):
     """docstring for Course"""
-    name = models.CharField(max_length=10)
+    name = models.CharField(max_length=20)
     ctype = models.CharField(max_length=10,default='')# 課程是通識必修還是選修
     dept = models.CharField(max_length=20, default='')
     avatar = models.ImageField(default='') # 大頭貼照片

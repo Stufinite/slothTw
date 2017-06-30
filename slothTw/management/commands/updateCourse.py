@@ -38,7 +38,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def createCourse(i, ctype):
-        Course.objects.get_or_create(
+        obj, created = Course.objects.get_or_create(
             name=i['title_parsed']['zh_TW'],
             dept=i['department'],
             teacher=i['professor'],
@@ -49,3 +49,5 @@ class Command(BaseCommand):
                 'book':'教科書配ppt'
             }
         )
+        if created:
+            print(obj, obj.dept, obj.teacher, obj.ctype)
