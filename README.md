@@ -270,7 +270,7 @@ These instructions will get you a copy of the project up and running on your loc
     ]
     ```
 
-3. `python manage.py runserver`：即可進入頁面測試 `slothTw` 是否安裝成功。
+3. `python manage.py updateCourse 課程.json`：就可以插入新的課程到心得版，課程.json請去執行[scrawler專案](https://github.com/stufinite/scrawler)，執行完之後目錄下就會出現 `課程.json`
 
 ### Break down into end to end tests
 
