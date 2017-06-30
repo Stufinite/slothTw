@@ -37,7 +37,10 @@ def cvalue(request):
 @queryString_required(['school', 'keyword'])
 def search(request):
     if 'teacher' in request.GET:
-        target = [Course.objects.get(teacher=request.GET['teacher'], name=request.GET['keyword'])]
+        try:
+            target = [Course.objects.get(teacher=request.GET['teacher'], name=request.GET['keyword'])]
+        except Exception as e:
+            target = [Course.objects.filter(teacher=request.GET['teacher'], name=request.GET['keyword'])[0]]
         result = json.loads(serializers.serialize('json', target, fields=('name', 'ctype', 'avatar', 'teacher', 'school', 'feedback_amount')))
         result[0]['fields']['avatar'] = target[0].avatar.url
         return JsonResponse(result, safe=False)
