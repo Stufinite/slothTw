@@ -10,7 +10,7 @@ from infernoWeb.models import User
 from infernoWeb.view.inferno import user_verify
 
 AMOUNT_NUM = 10
-SEARCH_NUM = 5
+SEARCH_NUM = 20
 # Create your views here.
 @queryString_required(['school', 'start'])
 def clist(request):

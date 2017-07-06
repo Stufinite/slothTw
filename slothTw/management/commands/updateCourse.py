@@ -38,6 +38,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def createCourse(i, ctype):
+        if i['professor'] == '待聘': return
         obj, created = Course.objects.get_or_create(
             name=i['title_parsed']['zh_TW'],
             dept=i['department'],

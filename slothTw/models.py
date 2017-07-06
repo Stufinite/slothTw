@@ -25,7 +25,7 @@ class Course(models.Model):
 
 class Comment(models.Model):
     course = models.ForeignKey(Course)
-    author = models.ForeignKey(User)
+    author = models.ForeignKey(User, default=User.objects.all()[0])
     create = models.DateTimeField(default=timezone.now)
     raw = models.CharField(max_length=1000)
     like = models.PositiveSmallIntegerField(default=0)
