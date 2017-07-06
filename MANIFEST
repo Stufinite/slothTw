@@ -8,6 +8,8 @@ slothTw/models.py
 slothTw/tests.py
 slothTw/urls.py
 slothTw/views.py
+slothTw/management/commands/getCourseFeedbackFromPtt.py
+slothTw/management/commands/updateCourse.py
 slothTw/migrations/0001_initial.py
 slothTw/migrations/0002_auto_20170616_1024.py
 slothTw/migrations/0003_auto_20170630_2050.py
