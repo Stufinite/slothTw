@@ -5,7 +5,7 @@ from django.utils import timezone
 # Create your models here.
 class Course(models.Model):
     """docstring for Course"""
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=25)
     ctype = models.CharField(max_length=10,default='')# 課程是通識必修還是選修
     dept = models.CharField(max_length=20, default='')
     avatar = models.ImageField(default='') # 大頭貼照片
@@ -25,7 +25,7 @@ class Course(models.Model):
 
 class Comment(models.Model):
     course = models.ForeignKey(Course)
-    author = models.ForeignKey(User, default=User.objects.all()[0])
+    author = models.ForeignKey(User)
     create = models.DateTimeField(default=timezone.now)
     raw = models.CharField(max_length=1000)
     like = models.PositiveSmallIntegerField(default=0)
@@ -52,4 +52,4 @@ class PageLog(models.Model):
     course = models.ForeignKey(Course)
     create = models.DateTimeField(default=timezone.now)
     def __str__(self):
-        return self.user.name + self.course.name + self.create.date().__str__()
+        return '{}-{}-{}'.format(self.user.name, self.course.name, self.create.date().__str__())

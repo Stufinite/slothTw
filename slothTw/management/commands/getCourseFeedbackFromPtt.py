@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from slothTw.models import Course, Comment
+from infernoWeb.models import User
 import json
 
 class Command(BaseCommand):
@@ -34,7 +35,7 @@ class Command(BaseCommand):
                             'avatar':'blackboard.png'
                         }
                     )
-                    Comment.objects.create(course=obj, raw=i['content']['feedback'])
+                    Comment.objects.create(course=obj, author=User.objects.all()[0], raw=i['content']['feedback'])
                     print(obj.id)
                 elif len(i['article_title']['genra'].split()) == 2:
                     obj, created = Course.objects.update_or_create(
@@ -49,7 +50,7 @@ class Command(BaseCommand):
                             'avatar':'blackboard.png'
                         }
                     )
-                    Comment.objects.create(course=obj, raw=i['content']['feedback'])
+                    Comment.objects.create(course=obj, author=User.objects.all()[0], raw=i['content']['feedback'])
                     print(obj.id)
                 else:
                     raise e
