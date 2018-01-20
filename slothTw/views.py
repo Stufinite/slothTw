@@ -8,6 +8,9 @@ from django.db.models import F
 import json, requests, itertools
 from infernoWeb.models import User
 from infernoWeb.view.inferno import user_verify
+from ngram import NGram
+courseNgram = NGram((i['name'] for i in Course.objects.values('name')))
+teacherNgram = NGram((i['teacher'] for i in Course.objects.values('teacher')))
 
 AMOUNT_NUM = 10
 SEARCH_NUM = 20
@@ -36,34 +39,20 @@ def cvalue(request):
 
 @queryString_required(['school', 'keyword'])
 def search(request):
-    if 'teacher' in request.GET:
-        try:
-            target = [Course.objects.get(teacher=request.GET['teacher'], name=request.GET['keyword'])]
-        except Exception as e:
-            target = [Course.objects.filter(teacher=request.GET['teacher'], name=request.GET['keyword'])[0]]
-        result = json.loads(serializers.serialize('json', target, fields=('name', 'ctype', 'avatar', 'teacher', 'school', 'feedback_amount')))
-        result[0]['fields']['avatar'] = target[0].avatar.url
-        return JsonResponse(result, safe=False)
-    nameList = Course.objects.filter(school=request.GET['school'], name__contains=request.GET['keyword'])[:SEARCH_NUM]
-    teacherList = Course.objects.filter(school=request.GET['school'], teacher__contains=request.GET['keyword'])[:SEARCH_NUM]
-    result = json.loads(serializers.serialize('json', nameList, fields=('name', 'ctype', 'avatar', 'teacher', 'school', 'feedback_amount'))) + json.loads(serializers.serialize('json', teacherList, fields=('name', 'ctype', 'avatar', 'teacher', 'school', 'feedback_amount')))
-    for r, i in zip(result, list(nameList) + list(teacherList)):
-        r['fields']['avatar'] = i.avatar.url
-    if len(result) == 0:
-        nlpapi_Expand =  list(itertools.chain(
-            *itertools.chain(*zip(
-                requests.get('http://140.120.13.244:10000/kem/?keyword={}&lang=cht'.format(request.GET['keyword'])).json(), 
-                requests.get('http://140.120.13.244:10000/kcm/?keyword={}&lang=cht'.format(request.GET['keyword'])).json())
-            )
-        ))[::2]
-        nlpapiList = []
-        for i in nlpapi_Expand:
-            nlpapiList += list(Course.objects.filter(school=request.GET['school'], name__contains=i)[:SEARCH_NUM])
-        result = json.loads(serializers.serialize('json', nlpapiList, fields=('name', 'ctype', 'avatar', 'teacher', 'school', 'feedback_amount')))
-        for r, i in zip(result, nlpapiList):
-            r['fields']['avatar'] = i.avatar.url
+    keyword = courseNgram.find(request.GET['keyword'])
+    teacher = '' if 'teacher' not in request.GET else teacherNgram.find(request.GET['teacher'])
+    try:
+        target = [Course.objects.get(teacher=teacher, name=keyword)]
+    except Exception as e:
+        if teacher:
+            target = [(i, teacherNgram.compare(teacher, i.teacher)) for i in Course.objects.filter(name=keyword)]
+            target = [i[0] for i in sorted(target, key=lambda x:-x[1])]
+        else:
+            target = Course.objects.filter(name=keyword)
+    result = json.loads(serializers.serialize('json', target, fields=('name', 'ctype', 'avatar', 'teacher', 'school', 'feedback_amount')))
+    for r, t in zip(result, target):
+        r['fields']['avatar'] = t.avatar.url
     return JsonResponse(result, safe=False)
-
 
 # 顯示特定一門課程的留言評論
 @queryString_required(['id', 'start'])

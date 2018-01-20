@@ -5,7 +5,7 @@ setup(
     packages = ['slothTw'],
     package_dir={'slothTw':'slothTw'},
     package_data={'slothTw':['management/commands/*', 'migrations/*']},
-    version = '4.3',
+    version = '4.4',
     description = 'API for feedback of Course',
     author = 'davidtnfsh',
     author_email = 'davidtnfsh@gmail.com',
@@ -16,7 +16,8 @@ setup(
     license='GPL3.0',
     install_requires=[
         'djangoApiDec',
-        'simplejson'
+        'simplejson',
+        'ngram'
     ],
     zip_safe=True
 )
